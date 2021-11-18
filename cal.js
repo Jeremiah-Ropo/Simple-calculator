@@ -3,18 +3,12 @@ const keys = calculator.querySelector('.calculator__keys')
 const display = document.querySelector('.calculator__display')
 
 const calculate = (n1, operator, n2) => {
-    let result = ''
-
-    if (operator === 'add') {
-        result = parseFloat(n1) + parseFloat(n2)
-    } else if ( operator === 'subtract'){
-        result = parseFloat(n1) - parseFloat(n2) 
-    } else if ( operator === 'multiply'){
-        result = parseFloat(n1) * parseFloat(n2)
-    } else if ( operator === 'divide'){
-        result = parseFloat(n1) / parseFloat(n2)
-    }
-    return result 
+    const firstNum = parseFloat(n1)
+    const secondNum = parseFloat(n2)
+    if (operator === 'add') return firstNum + secondNum
+    if ( operator === 'subtract') return firstNum - secondNum 
+    if ( operator === 'multiply') return firstNum * secondNum
+    if ( operator === 'divide') return firstNum / secondNum
 }
 
 
@@ -29,19 +23,33 @@ keys.addEventListener('click', e => {
         const previouskeyType = calculator.dataset.previouskeyType
 
         if (!action){
-            if (displayedNum === '0' || previouskeyType === 'operator'){
+            if (displayedNum === '0' || previouskeyType === 'operator' || previouskeyType === 'calculate'){
                 display.textContent = keyContent
             } else {
                 display.textContent = displayedNum + keyContent
             }
+            calculator.dataset.previouskeyType = 'number'
         }
+
         if (
             action === 'add' || action === 'subtract' ||
             action === 'multiply' || action === 'divide'
-        ) {
+        ) { 
+            const firstValue = calculator.dataset.firstValue
+            const operator = calculator.dataset.operator
+            const secondValue = displayedNum
+            if (firstValue && operator && previouskeyType !== 'operator' || previouskeyType !== 'calculate'){
+                const calcValue = calculate(firstValue, operator, secondValue)
+                display.textContent = calcValue
+                // Update calculated value as firstValue
+                calculator.dataset.firstValue = calcValue
+            } else {
+                // if there are no calculation, set displayedNum
+                calculator.dataset.firstValue = displayedNum
+            }
             key.classList.add('is-depressed')
             Array.from(key.parentNode.children).forEach(
-                k => k.classList.remove('is-depressed')
+                 k => k.classList.remove('is-depressed')
             )
             calculator.dataset.previouskeyType = 'operator'
             calculator.dataset.operator = action
@@ -49,18 +57,45 @@ keys.addEventListener('click', e => {
         } 
 
         if ( action === 'decimal'){
-            display.textContent = displayedNum + '.'
+            if (!displayedNum.includes('.')){
+                display.textContent = displayedNum + '.'
+            } else if (previouskeyType === 'operator' || previouskeyType === 'calculate'){
+                display.textContent = '0.'
+            }
+            calculator.dataset.previouskeyType = 'decimal'
         }
+
         if ( action === 'clear' ){
-            console.log('clear key!')
+            if (key.textContent === 'AC'){
+                calculator.dataset.firstValue = ''
+                calculator.dataset.modValue = ''
+                calculator.dataset.operator = ''
+                calculator.dataset.previouskeyType = ''
+            }else{
+                key.textContent = 'AC'
+            }
+            display.textContent = 0
+
+
+            calculator.dataset.previouskeyType = 'clear'
         }
-
+        if ( action !== 'clear'){
+            const clearButton = calculator.querySelector('[data-action=clear]')
+            clearButton.textContent = 'CE'
+        }
         if ( action === 'calculate') {
-            const firstValue = calculator.dataset.firstValue
+            let firstValue = calculator.dataset.firstValue
             const operator = calculator.dataset.operator
-            const secondValue = displayedNum
-
+            let secondValue = displayedNum
+            if (firstValue){
+                if (previouskeyType === 'calculate'){
+                    firstValue = displayedNum
+                    secondValue = calculator.dataset.modValue
+                }
             display.textContent = calculate(firstValue, operator, secondValue)
+            }
+            calculator.dataset.previouskeyType = 'calculate'
+            calculator.dataset.modValue = secondValue
         }
     }
 })

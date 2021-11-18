@@ -108,7 +108,7 @@ body {
     background-color: #222222;
     color: #fff;
     font-size: 1.714285714rem;
-    padding: 0.5em 0.75em;
+    padding: 0.5em 0.75em 0.5em;
     text-align: right;
 }
 
@@ -125,7 +125,7 @@ body {
     text-align: center;
 }
 
-.calculator__keys > *:active::before,
+.calculator__keys > *:active::after,
 .calculator__keys > .is-depressed::after {
     background-color: rgba(0, 0, 0, 0.20);
     bottom: 0;
